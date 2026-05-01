@@ -29,7 +29,7 @@ class ExecutionStepTile extends StatelessWidget {
           color: isCurrent ? Colors.blue.withOpacity(0.05) : const Color(0xFF14161F),
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: isCurrent ? Colors.blue.withOpacity(0.3) : Colors.white05,
+            color: isCurrent ? Colors.blue.withOpacity(0.3) : Colors.white,
           ),
         ),
         child: Row(

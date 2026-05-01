@@ -39,7 +39,7 @@ class CommanderScreen extends StatelessWidget {
                               final stepsAsync = ref.watch(stepsProvider(unit.id));
                               return CommanderPanel(
                                 unit: unit,
-                                steps: stepsAsync.valueOrNull,
+                                steps: stepsAsync.value,
                                 onCompleteStep: (stepId) => ref.read(actionsProvider).completeStep(stepId),
                               );
                             },

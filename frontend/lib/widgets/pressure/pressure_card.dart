@@ -23,7 +23,7 @@ class PressureCard extends StatelessWidget {
         color: const Color(0xFF14161F),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: isWarning ? color.withOpacity(0.5) : Colors.white05,
+          color: isWarning ? color.withOpacity(0.5) : Colors.white,
         ),
       ),
       child: Column(

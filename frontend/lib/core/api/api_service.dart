@@ -53,4 +53,53 @@ class ApiService {
     }
     throw Exception('Failed to load system pressure');
   }
+
+  Future<List<ExecutionUnit>> getUnits() async {
+    final response = await http.get(Uri.parse('$baseUrl/units'));
+    if (response.statusCode == 200) {
+      final List<dynamic> data = jsonDecode(response.body);
+      return data.map((json) => ExecutionUnit.fromJson(json)).toList();
+    }
+    throw Exception('Failed to load units');
+  }
+
+  Future<void> updateUnitStatus(int unitId, String status) async {
+    final response = await http.put(
+      Uri.parse('$baseUrl/units/$unitId'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'status': status}),
+    );
+    
+    if (response.statusCode == 400) {
+      final data = jsonDecode(response.body);
+      final detail = data['detail']?.toString() ?? '';
+      if (detail.contains('active') && detail.contains('allowed')) {
+        throw Exception('Active limit reached');
+      }
+    }
+    
+    if (response.statusCode != 200) {
+      throw Exception('Failed to update unit status: ${response.body}');
+    }
+  }
+
+  Future<void> activateAndFocus(int unitId) async {
+    final response = await http.post(Uri.parse('$baseUrl/units/$unitId/activate-and-focus'));
+    
+    if (response.statusCode == 400) {
+      final data = jsonDecode(response.body);
+      final detail = data['detail']?.toString() ?? '';
+      if (detail.contains('Max 5 active units')) {
+        throw Exception('Active limit reached (max 5)');
+      }
+      if (detail.contains('Max 2 active books')) {
+        throw Exception('Book limit reached (max 2)');
+      }
+      throw Exception(detail);
+    }
+    
+    if (response.statusCode != 200) {
+      throw Exception('Failed to activate and focus: ${response.body}');
+    }
+  }
 }

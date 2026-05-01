@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../models/execution_unit.dart';
 import '../../models/step.dart' as model;
 import 'step_commander.dart';
+import '../../screens/backlog_screen.dart';
 
 class CommanderPanel extends StatelessWidget {
   final ExecutionUnit? unit;
@@ -18,10 +19,41 @@ class CommanderPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (unit == null) {
-      return const Center(
-        child: Text(
-          'No active focus. Select a unit.',
-          style: TextStyle(color: Colors.white38, fontSize: 16),
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.rocket_launch_outlined, size: 64, color: Colors.white10),
+            const SizedBox(height: 24),
+            const Text(
+              'Pick something to focus',
+              style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Your execution plan is waiting.',
+              style: TextStyle(color: Colors.white38, fontSize: 14),
+            ),
+            const SizedBox(height: 32),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => const BacklogScreen()),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blueAccent,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  ),
+                  child: const Text('GO TO BACKLOG'),
+                ),
+              ],
+            ),
+          ],
         ),
       );
     }

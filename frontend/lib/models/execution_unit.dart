@@ -8,6 +8,7 @@ class ExecutionUnit {
   final String status;
   final DateTime lastActivityAt;
   final int userId;
+  final DateTime createdAt;
 
   ExecutionUnit({
     required this.id,
@@ -19,6 +20,7 @@ class ExecutionUnit {
     required this.status,
     required this.lastActivityAt,
     required this.userId,
+    required this.createdAt,
   });
 
   factory ExecutionUnit.fromJson(Map<String, dynamic> json) {
@@ -32,6 +34,7 @@ class ExecutionUnit {
       status: json['status'],
       lastActivityAt: DateTime.parse(json['last_activity_at']),
       userId: json['user_id'],
+      createdAt: DateTime.parse(json['created_at']),
     );
   }
 
@@ -46,6 +49,7 @@ class ExecutionUnit {
       'status': status,
       'last_activity_at': lastActivityAt.toIso8601String(),
       'user_id': userId,
+      'created_at': createdAt.toIso8601String(),
     };
   }
 }

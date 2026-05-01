@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../models/system_pressure.dart';
+import '../../screens/backlog_screen.dart';
+import '../../screens/completed_screen.dart';
 import 'pressure_card.dart';
 
 class PressurePanel extends StatelessWidget {
@@ -44,7 +46,53 @@ class PressurePanel extends StatelessWidget {
             color: pressure.noProgressToday ? Colors.amber : Colors.green.withOpacity(0.2),
             isWarning: pressure.noProgressToday,
           ),
+          const Spacer(),
+          const Divider(color: Colors.white10),
+          const SizedBox(height: 16),
+          _NavButton(
+            label: 'View Backlog',
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const BacklogScreen()),
+            ),
+          ),
+          const SizedBox(height: 8),
+          _NavButton(
+            label: 'View Completed',
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const CompletedScreen()),
+            ),
+          ),
         ],
+      ),
+    );
+  }
+}
+
+class _NavButton extends StatelessWidget {
+  final String label;
+  final VoidCallback onTap;
+
+  const _NavButton({required this.label, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      child: TextButton(
+        onPressed: onTap,
+        style: TextButton.styleFrom(
+          alignment: Alignment.centerLeft,
+          padding: const EdgeInsets.symmetric(vertical: 12),
+        ),
+        child: Text(
+          label.toUpperCase(),
+          style: const TextStyle(
+            color: Colors.white38,
+            fontSize: 11,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 1,
+          ),
+        ),
       ),
     );
   }

@@ -4,7 +4,7 @@ import '../../models/step.dart' as model;
 import 'deadline_badge.dart';
 import '../execution_plan/execution_plan_screen.dart';
 
-class StepCommander extends StatelessWidget {
+class StepCommander extends StatefulWidget {
   final ExecutionUnit unit;
   final List<model.Step> steps;
   final VoidCallback? onComplete;
@@ -17,18 +17,25 @@ class StepCommander extends StatelessWidget {
   });
 
   @override
+  State<StepCommander> createState() => _StepCommanderState();
+}
+
+class _StepCommanderState extends State<StepCommander> {
+  bool _isCompleting = false;
+
+  @override
   Widget build(BuildContext context) {
-    if (steps.isEmpty) return const Text('No steps available.', style: TextStyle(color: Colors.white24));
+    if (widget.steps.isEmpty) return const Text('No steps available.', style: TextStyle(color: Colors.white24));
 
     // Logic for selection - kept strictly to deriving from input
-    final nextStep = steps.firstWhere(
+    final nextStep = widget.steps.firstWhere(
       (s) => s.status != 'done',
-      orElse: () => steps.last,
+      orElse: () => widget.steps.last,
     );
-    final isAllDone = steps.every((s) => s.status == 'done');
+    final isAllDone = widget.steps.every((s) => s.status == 'done');
     
-    final doneCount = steps.where((s) => s.status == 'done').length;
-    final totalCount = steps.length;
+    final doneCount = widget.steps.where((s) => s.status == 'done').length;
+    final totalCount = widget.steps.length;
     final progress = totalCount > 0 ? doneCount / totalCount : 0.0;
     
     final now = DateTime.now().toUtc();
@@ -93,20 +100,29 @@ class StepCommander extends StatelessWidget {
             height: 64,
             width: 320,
             child: ElevatedButton(
-              onPressed: onComplete,
+              onPressed: _isCompleting ? null : () {
+                setState(() => _isCompleting = true);
+                widget.onComplete?.call();
+              },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.blue,
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
               ),
-              child: const Row(
+              child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.check_circle_outline),
-                  SizedBox(width: 12),
+                  _isCompleting 
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                      )
+                    : const Icon(Icons.check_circle_outline),
+                  const SizedBox(width: 12),
                   Text(
-                    'Complete This Step',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    _isCompleting ? 'Completing...' : 'Complete This Step',
+                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                 ],
               ),

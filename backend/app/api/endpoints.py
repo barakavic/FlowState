@@ -151,6 +151,10 @@ def complete_step(step_id: int, session: Session = Depends(get_session), user_id
     if not unit or unit.user_id != user_id:
         raise HTTPException(status_code=404, detail="Step not found")
         
+    # Idempotency: If already done, return success
+    if step.status == "done":
+        return {"ok": True, "already_done": True}
+
     # Enforce course sequencing
     if unit.type == "course":
         prev_step = session.exec(select(Step).where(
@@ -161,10 +165,11 @@ def complete_step(step_id: int, session: Session = Depends(get_session), user_id
         if prev_step and prev_step.status != "done":
             raise HTTPException(status_code=400, detail="Previous step must be completed first")
 
+    now = utc_now()
     step.status = "done"
-    step.completed_at = utc_now()
-    step.updated_at = utc_now()
-    unit.last_activity_at = utc_now()
+    step.completed_at = now
+    step.updated_at = now
+    unit.last_activity_at = now
     
     session.add(step)
     
@@ -173,6 +178,7 @@ def complete_step(step_id: int, session: Session = Depends(get_session), user_id
     # Replace the current step in the list evaluation since we haven't committed yet
     if all((s.status == "done" if s.id != step.id else True) for s in all_steps):
         unit.status = "completed"
+        unit.updated_at = now
         
         # Focus Safety: Clear focus if unit is completed
         user = session.get(User, user_id)
@@ -201,16 +207,50 @@ def set_focus(unit_id: int, session: Session = Depends(get_session), user_id: in
     if not unit or unit.user_id != user_id:
         raise HTTPException(status_code=404, detail="Unit not found")
         
+    # Idempotency
+    if user.current_focus_unit_id == unit_id:
+        return {"ok": True, "current_focus_unit_id": unit_id, "no_op": True}
+
+    now = utc_now()
     user.current_focus_unit_id = unit_id
-    user.updated_at = utc_now()
+    user.updated_at = now
     
     # Activity tracking
-    unit.last_activity_at = utc_now()
+    unit.last_activity_at = now
     
     session.add(user)
     session.add(unit)
     session.commit()
     return {"ok": True, "current_focus_unit_id": unit_id}
+
+@router.post("/units/{unit_id}/activate-and-focus", response_model=ExecutionUnitResponse)
+def activate_and_focus_unit(unit_id: int, session: Session = Depends(get_session), user_id: int = Depends(get_current_user_id)):
+    unit = session.get(ExecutionUnit, unit_id)
+    if not unit or unit.user_id != user_id:
+        raise HTTPException(status_code=404, detail="Unit not found")
+        
+    user = session.get(User, user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    # Idempotency
+    if unit.status == "active" and user.current_focus_unit_id == unit_id:
+        return unit
+
+    now = utc_now()
+    if unit.status != "active":
+        enforce_active_limits(session, user_id, unit.type)
+        unit.status = "active"
+        unit.updated_at = now
+        session.add(unit)
+
+    user.current_focus_unit_id = unit_id
+    user.updated_at = now
+    session.add(user)
+    
+    session.commit()
+    session.refresh(unit)
+    return unit
 
 @router.post("/units/{unit_id}/schedule", response_model=ExecutionUnitResponse)
 def schedule_execution_unit(

@@ -32,6 +32,8 @@ Thumbs.db
 .vscode/
 
 # Project specific
+docs/
+DesignReference/
 backend/alembic/versions/__pycache__/
 frontend/.dart_tool/
 frontend/build/

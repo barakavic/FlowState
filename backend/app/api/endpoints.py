@@ -17,6 +17,10 @@ from app.services.parser_pdf import parse_pdf_toc
 
 router = APIRouter()
 
+@router.get("/health")
+def health_check():
+    return {"status": "ok"}
+
 def utc_now() -> datetime:
     return datetime.now(timezone.utc)
 
@@ -46,6 +50,10 @@ def enforce_active_limits(session: Session, user_id: int, new_unit_type: str = N
         if books_count >= 2:
             raise HTTPException(status_code=400, detail="Max 2 active books allowed")
 
+
+@router.get("/health")
+def health_check():
+    return {"status": "ok"}
 
 @router.get("/units", response_model=List[ExecutionUnitResponse])
 def get_units(session: Session = Depends(get_session), user_id: int = Depends(get_current_user_id)):
@@ -151,9 +159,9 @@ def complete_step(step_id: int, session: Session = Depends(get_session), user_id
     if not unit or unit.user_id != user_id:
         raise HTTPException(status_code=404, detail="Step not found")
         
-    # Idempotency: If already done, return success
+    # Idempotency Check
     if step.status == "done":
-        return {"ok": True, "already_done": True}
+        return {"success": True, "already_done": True}
 
     # Enforce course sequencing
     if unit.type == "course":
@@ -188,7 +196,7 @@ def complete_step(step_id: int, session: Session = Depends(get_session), user_id
             
     session.add(unit)
     session.commit()
-    return {"ok": True}
+    return {"success": True, "already_done": False}
 
 @router.get("/focus")
 def get_focus(session: Session = Depends(get_session), user_id: int = Depends(get_current_user_id)):
@@ -223,7 +231,7 @@ def set_focus(unit_id: int, session: Session = Depends(get_session), user_id: in
     session.commit()
     return {"ok": True, "current_focus_unit_id": unit_id}
 
-@router.post("/units/{unit_id}/activate-and-focus", response_model=ExecutionUnitResponse)
+@router.post("/units/{unit_id}/activate-and-focus")
 def activate_and_focus_unit(unit_id: int, session: Session = Depends(get_session), user_id: int = Depends(get_current_user_id)):
     unit = session.get(ExecutionUnit, unit_id)
     if not unit or unit.user_id != user_id:
@@ -235,7 +243,7 @@ def activate_and_focus_unit(unit_id: int, session: Session = Depends(get_session
 
     # Idempotency
     if unit.status == "active" and user.current_focus_unit_id == unit_id:
-        return unit
+        return {"success": True, "already_active": True, "unit": unit}
 
     now = utc_now()
     if unit.status != "active":
@@ -250,7 +258,7 @@ def activate_and_focus_unit(unit_id: int, session: Session = Depends(get_session
     
     session.commit()
     session.refresh(unit)
-    return unit
+    return {"success": True, "already_active": False, "unit": unit}
 
 @router.post("/units/{unit_id}/schedule", response_model=ExecutionUnitResponse)
 def schedule_execution_unit(

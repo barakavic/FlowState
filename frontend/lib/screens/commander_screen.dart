@@ -8,6 +8,8 @@ import '../providers/steps_provider.dart';
 import '../providers/pressure_provider.dart';
 import '../providers/actions_provider.dart';
 
+import '../providers/health_provider.dart';
+
 class CommanderScreen extends StatelessWidget {
   const CommanderScreen({super.key});
 
@@ -15,8 +17,41 @@ class CommanderScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF0F1117),
-      body: Row(
+      body: Column(
         children: [
+          Consumer(
+            builder: (context, ref, child) {
+              final healthAsync = ref.watch(healthProvider);
+              return healthAsync.when(
+                data: (isOk) => isOk 
+                  ? const SizedBox.shrink() 
+                  : Container(
+                      width: double.infinity,
+                      color: Colors.redAccent,
+                      padding: const EdgeInsets.symmetric(vertical: 4),
+                      child: const Text(
+                        'OFFLINE: Check your connection to the Flowstate backend.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                loading: () => const SizedBox.shrink(),
+                error: (_, __) => Container(
+                  width: double.infinity,
+                  color: Colors.redAccent,
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  child: const Text(
+                    'OFFLINE: Check your connection to the Flowstate backend.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              );
+            },
+          ),
+          Expanded(
+            child: Row(
+              children: [
           // 1. MAIN COMMANDER AREA (Center/Left)
           Expanded(
             flex: 3,
@@ -58,22 +93,25 @@ class CommanderScreen extends StatelessWidget {
           
           // 2. SYSTEM PRESSURE (Right)
           const VerticalDivider(width: 1, color: Colors.white10),
-          SizedBox(
-            width: 280,
-            child: Consumer(
-              builder: (context, ref, child) {
-                final pressureAsync = ref.watch(pressureProvider);
-                
-                return pressureAsync.when(
-                  data: (pressure) => PressurePanel(pressure: pressure),
-                  loading: () => const Center(child: CircularProgressIndicator()),
-                  error: (err, stack) => Center(child: Text('Error: $err')),
-                );
-              },
-            ),
+              SizedBox(
+                width: 280,
+                child: Consumer(
+                  builder: (context, ref, child) {
+                    final pressureAsync = ref.watch(pressureProvider);
+                    
+                    return pressureAsync.when(
+                      data: (pressure) => PressurePanel(pressure: pressure),
+                      loading: () => const Center(child: CircularProgressIndicator()),
+                      error: (err, stack) => Center(child: Text('Error: $err')),
+                    );
+                  },
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
-    );
+        ),
+      ],
+    ),
+        );
   }
 }

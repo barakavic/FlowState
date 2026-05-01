@@ -1,5 +1,11 @@
 # flowstate
 
+> ** Status Depreceated Prototype **
+> This version of flowstate was vibecoded and is not functional or stable 
+> It served as a quick prototype and there is a current rebuild of the architecture
+
+> The repository will be updated once the architecture is ready
+
 A new Flutter project.
 
 ## Getting Started

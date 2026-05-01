@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../models/system_pressure.dart';
 import '../../screens/backlog_screen.dart';
 import '../../screens/completed_screen.dart';
+import '../../screens/create_unit_screen.dart';
 import 'pressure_card.dart';
 
 class PressurePanel extends StatelessWidget {
@@ -46,8 +47,43 @@ class PressurePanel extends StatelessWidget {
             color: pressure.noProgressToday ? Colors.amber : Colors.green.withOpacity(0.2),
             isWarning: pressure.noProgressToday,
           ),
+          if (pressure.overdueSteps == 0 && pressure.staleUnits == 0 && !pressure.noProgressToday)
+            Padding(
+              padding: const EdgeInsets.only(top: 24),
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.green.withOpacity(0.05),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Row(
+                  children: [
+                    Icon(Icons.check_circle, color: Colors.green, size: 16),
+                    SizedBox(width: 12),
+                    Text('ALL CLEAR', style: TextStyle(color: Colors.green, fontSize: 11, fontWeight: FontWeight.bold)),
+                  ],
+                ),
+              ),
+            ),
           const Spacer(),
           const Divider(color: Colors.white10),
+          const SizedBox(height: 24),
+          SizedBox(
+            width: double.infinity,
+            height: 48,
+            child: ElevatedButton.icon(
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const CreateUnitScreen()),
+              ),
+              icon: const Icon(Icons.add, size: 18),
+              label: const Text('CREATE NEW UNIT', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blueAccent,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              ),
+            ),
+          ),
           const SizedBox(height: 16),
           _NavButton(
             label: 'View Backlog',

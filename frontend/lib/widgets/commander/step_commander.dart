@@ -3,6 +3,7 @@ import '../../models/execution_unit.dart';
 import '../../models/step.dart' as model;
 import 'deadline_badge.dart';
 import '../execution_plan/execution_plan_screen.dart';
+import '../../screens/focus_switch_screen.dart';
 
 class StepCommander extends StatefulWidget {
   final ExecutionUnit unit;
@@ -155,7 +156,12 @@ class _StepCommanderState extends State<StepCommander> {
             ),
             const SizedBox(width: 20),
             TextButton.icon(
-              onPressed: () {},
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const FocusSwitchScreen()),
+                );
+              },
               icon: const Icon(Icons.swap_horiz, size: 18),
               label: const Text('Switch Focus'),
               style: TextButton.styleFrom(foregroundColor: Colors.white38),

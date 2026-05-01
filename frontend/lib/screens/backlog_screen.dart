@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/units_provider.dart';
 import '../widgets/backlog/backlog_list.dart';
 
+import 'create_unit_screen.dart';
+
 class BacklogScreen extends ConsumerWidget {
   const BacklogScreen({super.key});
 
@@ -31,6 +33,16 @@ class BacklogScreen extends ConsumerWidget {
         ),
       ),
       body: BacklogList(units: backlogUnits),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(builder: (_) => const CreateUnitScreen()),
+          );
+        },
+        backgroundColor: Colors.blue,
+        icon: const Icon(Icons.add, color: Colors.white),
+        label: const Text('NEW UNIT', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+      ),
     );
   }
 }

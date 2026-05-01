@@ -3,6 +3,8 @@ import '../../models/execution_unit.dart';
 import '../../models/step.dart' as model;
 import 'step_commander.dart';
 import '../../screens/backlog_screen.dart';
+import '../focus/focus_indicator.dart';
+import '../../screens/create_unit_screen.dart';
 
 class CommanderPanel extends StatelessWidget {
   final ExecutionUnit? unit;
@@ -26,12 +28,12 @@ class CommanderPanel extends StatelessWidget {
             const Icon(Icons.rocket_launch_outlined, size: 64, color: Colors.white10),
             const SizedBox(height: 24),
             const Text(
-              'Pick something to focus',
+              'No active focus',
               style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             const Text(
-              'Your execution plan is waiting.',
+              'Select a unit from your active list or create a new one.',
               style: TextStyle(color: Colors.white38, fontSize: 14),
             ),
             const SizedBox(height: 32),
@@ -45,11 +47,25 @@ class CommanderPanel extends StatelessWidget {
                     );
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blueAccent,
+                    backgroundColor: Colors.white10,
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                   ),
                   child: const Text('GO TO BACKLOG'),
+                ),
+                const SizedBox(width: 16),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => const CreateUnitScreen()),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blueAccent,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  ),
+                  child: const Text('CREATE NEW'),
                 ),
               ],
             ),
@@ -63,50 +79,8 @@ class CommanderPanel extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: Colors.blue.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(4),
-                  border: Border.all(color: Colors.blue.withOpacity(0.5)),
-                ),
-                child: Text(
-                  unit!.type.toUpperCase(),
-                  style: const TextStyle(
-                    color: Colors.blue,
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1.0,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              const Icon(Icons.circle, size: 8, color: Colors.green),
-              const SizedBox(width: 8),
-              Text(
-                'ACTIVE',
-                style: TextStyle(
-                  color: Colors.white.withOpacity(0.4),
-                  fontSize: 10,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Text(
-            unit!.title,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 32,
-              fontWeight: FontWeight.w800,
-              letterSpacing: -0.5,
-            ),
-          ),
-          const SizedBox(height: 32),
+          FocusIndicator(unit: unit!),
+          const SizedBox(height: 48),
           
           // Step Content
           Expanded(

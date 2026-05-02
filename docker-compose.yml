@@ -1,0 +1,51 @@
+services:
+  db:
+    image: postgres:15
+    container_name: flowstate-v2-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - flowstate_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    ports:
+    - "5433:5432"
+
+    pgadmin:
+      image: dpage/pgadmin4
+      container_name: flowstate-pgadmin
+      restart: unless-stopped
+      environment:
+        PGADMIN_DEFAULT_EMAIL:admin@flowstate.com
+        PGADMIN_DEFAULT_PASSWORD:admin
+      ports:
+        - "5050:80"
+      networks:
+        - flowstate_network
+      depends_on:
+        - db
+
+  app:
+    build: .
+    volumes:
+      - .:/app
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+    depends_on:
+      - db
+
+networks:
+  flowstate_network:
+    driver: bridge
+
+volumes:
+  pgdata:

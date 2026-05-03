@@ -14,11 +14,8 @@ config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-# add your model's MetaData object here
-# for 'autogenerate' support
-# from myapp import mymodel
-# target_metadata = mymodel.Base.metadata
-target_metadata = None
+from app.models import Base, User, Task, TaskType, Step, Status, Type
+target_metadata = Base.metadata
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
@@ -51,12 +48,15 @@ def run_migrations_offline() -> None:
 
 
 def run_migrations_online() -> None:
-    """Run migrations in 'online' mode.
+    import os
+    url = os.environ.get("DATABASE_URL")
+    if url:
+        if url.startswith("postgresql+asyncpg://"):
+            url = url.replace("postgresql+asyncpg://", "postgresql+psycopg2://")
+        elif url.startswith("postgresql://"):
+            url = url.replace("postgresql://", "postgresql+psycopg2://")
+        config.set_main_option("sqlalchemy.url", url)
 
-    In this scenario we need to create an Engine
-    and associate a connection with the context.
-
-    """
     connectable = engine_from_config(
         config.get_section(config.config_ini_section, {}),
         prefix="sqlalchemy.",
